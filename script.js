@@ -55,6 +55,7 @@ const observer = new IntersectionObserver((entries) => {
 // Observe elements for animation
 document.addEventListener('DOMContentLoaded', () => {
     const animatedElements = document.querySelectorAll('.skill-item, .project-card, .timeline-item, .stat-item');
+    const aboutParagraphs = document.querySelectorAll('.about-text p');
     
     animatedElements.forEach(el => {
         el.style.opacity = '0';
@@ -62,20 +63,53 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         observer.observe(el);
     });
+    
+    // Add fade-in animation for about paragraphs
+    aboutParagraphs.forEach((paragraph, index) => {
+        paragraph.style.transitionDelay = `${index * 0.2}s`;
+    });
+    
+    // Create observer for about section
+    const aboutObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const paragraphs = entry.target.querySelectorAll('p');
+                paragraphs.forEach(paragraph => {
+                    paragraph.classList.add('fade-in');
+                });
+            }
+        });
+    }, { threshold: 0.3 });
+    
+    const aboutSection = document.querySelector('.about-text');
+    if (aboutSection) {
+        aboutObserver.observe(aboutSection);
+    }
 });
 
-// Skill item hover effects
+// Skill category gradual glow effect
+document.querySelectorAll('.skill-category').forEach(category => {
+    category.addEventListener('mouseenter', () => {
+        category.style.transition = 'box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        category.style.boxShadow = '0 0 20px rgba(255, 105, 180, 0.5)';
+    });
+    
+    category.addEventListener('mouseleave', () => {
+        category.style.boxShadow = '0 0 0px rgba(255, 105, 180, 0)';
+    });
+});
+
+// Skill item gradual glow effect
 document.querySelectorAll('.skill-item').forEach(item => {
     item.addEventListener('mouseenter', () => {
-        const icon = item.querySelector('i');
-        icon.style.transform = 'scale(1.2) rotate(5deg)';
-        icon.style.textShadow = '0 0 20px var(--glow-color)';
+        item.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        item.style.background = 'rgba(255, 105, 180, 0.15)';
+        item.style.boxShadow = '0 0 25px rgba(255, 105, 180, 0.4)';
     });
     
     item.addEventListener('mouseleave', () => {
-        const icon = item.querySelector('i');
-        icon.style.transform = 'scale(1) rotate(0deg)';
-        icon.style.textShadow = 'none';
+        item.style.background = 'var(--primary-bg)';
+        item.style.boxShadow = '0 0 0px rgba(255, 105, 180, 0)';
     });
 });
 
@@ -134,31 +168,9 @@ if (contactForm) {
     });
 }
 
-// Floating elements animation enhancement
-const floatingIcons = document.querySelectorAll('.floating-icon');
-floatingIcons.forEach((icon, index) => {
-    icon.addEventListener('mouseenter', () => {
-        icon.style.transform = 'scale(1.2) rotate(10deg)';
-        icon.style.filter = 'drop-shadow(0 0 20px var(--glow-color))';
-    });
-    
-    icon.addEventListener('mouseleave', () => {
-        icon.style.transform = 'scale(1) rotate(0deg)';
-        icon.style.filter = 'none';
-    });
-});
 
-// Parallax effect for hero section
-window.addEventListener('scroll', () => {
-    const scrolled = window.pageYOffset;
-    const hero = document.querySelector('.hero');
-    const floatingElements = document.querySelector('.floating-elements');
-    
-    if (hero && floatingElements) {
-        const rate = scrolled * -0.5;
-        floatingElements.style.transform = `translateY(${rate}px)`;
-    }
-});
+
+
 
 // Typing effect for hero title
 function typeWriter(element, text, speed = 100) {
@@ -248,18 +260,72 @@ scrollToTopBtn.addEventListener('mouseleave', () => {
     scrollToTopBtn.style.boxShadow = '0 4px 15px var(--shadow-color)';
 });
 
+// Add shooting star effect to hero section
+function createShootingStar() {
+    const shootingStar = document.createElement('div');
+    shootingStar.style.cssText = `
+        position: absolute;
+        width: 2px;
+        height: 80px;
+        background: linear-gradient(to top, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.8), transparent);
+        pointer-events: none;
+        animation: shooting-star 12s linear;
+        z-index: 5;
+        top: 0;
+        left: 0;
+        transform-origin: center center;
+        opacity: 1;
+    `;
+    
+    document.querySelector('.hero').appendChild(shootingStar);
+    
+    // JavaScript animation for transparency
+    let startTime = Date.now();
+    const duration = 12000; // 12 seconds
+    
+    function updateOpacity() {
+        const elapsed = Date.now() - startTime;
+        const progress = elapsed / duration;
+        
+        if (progress >= 1) {
+            shootingStar.remove();
+            return;
+        }
+        
+        // Start fading after 1/3 of the screen (after 33% of animation)
+        if (progress > 0.03) {
+            const fadeProgress = (progress - 0.1) / 0.67; // 0 to 1 over the remaining 67%
+            const opacity = Math.max(0, 1 - fadeProgress);
+            shootingStar.style.opacity = opacity;
+        } else {
+            shootingStar.style.opacity = 1;
+        }
+        
+        requestAnimationFrame(updateOpacity);
+    }
+    
+    requestAnimationFrame(updateOpacity);
+}
+
+// Create shooting stars periodically with initial delay
+setTimeout(() => {
+    createShootingStar();
+    setInterval(createShootingStar, 9000);
+}, 500);
+
 // Add particle effect to hero section
 function createParticle() {
     const particle = document.createElement('div');
     particle.style.cssText = `
         position: absolute;
-        width: 4px;
-        height: 4px;
-        background: var(--accent-pink);
+        width: 3px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.8);
         border-radius: 50%;
         pointer-events: none;
         opacity: 0.6;
         animation: particleFloat 8s linear infinite;
+        z-index: 3;
     `;
     
     particle.style.left = Math.random() * 100 + '%';
@@ -273,7 +339,7 @@ function createParticle() {
 }
 
 // Create particles periodically
-setInterval(createParticle, 2000);
+setInterval(createParticle, 3000);
 
 // Add CSS for particle animation
 const style = document.createElement('style');
@@ -292,6 +358,21 @@ style.textContent = `
         100% {
             transform: translateY(-100px) scale(1);
             opacity: 0;
+        }
+    }
+    
+    @keyframes shooting-star {
+        0% {
+            transform: translateX(100vw) translateY(-100px) rotate(45deg);
+        }
+        3% {
+            transform: translateX(95vw) translateY(5vh) rotate(45deg);
+        }
+        50% {
+            transform: translateX(50vw) translateY(50vh) rotate(45deg);
+        }
+        100% {
+            transform: translateX(-100px) translateY(100vh) rotate(45deg);
         }
     }
 `;
