@@ -27,7 +27,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Navbar background on scroll
+// Navbar background on scroll and active navigation highlighting
 window.addEventListener('scroll', () => {
     const navbar = document.querySelector('.navbar');
     if (window.scrollY > 100) {
@@ -35,7 +35,41 @@ window.addEventListener('scroll', () => {
     } else {
         navbar.style.background = 'rgba(10, 10, 10, 0.95)';
     }
+    
+    // Update active navigation link
+    updateActiveNavLink();
 });
+
+// Function to update active navigation link
+function updateActiveNavLink() {
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    let current = '';
+    
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (window.pageYOffset >= (sectionTop - 200)) {
+            current = section.getAttribute('id');
+        }
+    });
+    
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+            link.classList.add('active');
+        }
+    });
+    
+    // If no section is active (at the very top), make home active
+    if (!current && window.pageYOffset < 200) {
+        const homeLink = document.querySelector('.nav-link[href="#home"]');
+        if (homeLink) {
+            homeLink.classList.add('active');
+        }
+    }
+}
 
 // Intersection Observer for animations
 const observerOptions = {
@@ -48,6 +82,10 @@ const observer = new IntersectionObserver((entries) => {
         if (entry.isIntersecting) {
             entry.target.style.opacity = '1';
             entry.target.style.transform = 'translateY(0)';
+        } else {
+            // Animate out when element leaves viewport
+            entry.target.style.opacity = '0';
+            entry.target.style.transform = 'translateY(30px)';
         }
     });
 }, observerOptions);
@@ -77,6 +115,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 paragraphs.forEach(paragraph => {
                     paragraph.classList.add('fade-in');
                 });
+            } else {
+                // Remove fade-in class when element leaves viewport
+                const paragraphs = entry.target.querySelectorAll('p');
+                paragraphs.forEach(paragraph => {
+                    paragraph.classList.remove('fade-in');
+                });
             }
         });
     }, { threshold: 0.3 });
@@ -85,6 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aboutSection) {
         aboutObserver.observe(aboutSection);
     }
+    
+    // Initialize active navigation link on page load
+    updateActiveNavLink();
 });
 
 // Skill category gradual glow effect
@@ -103,29 +150,28 @@ document.querySelectorAll('.skill-category').forEach(category => {
 document.querySelectorAll('.skill-item').forEach(item => {
     item.addEventListener('mouseenter', () => {
         item.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-        item.style.background = 'rgba(255, 105, 180, 0.15)';
-        item.style.boxShadow = '0 0 25px rgba(255, 105, 180, 0.4)';
+        item.style.background = '#ff69b4';
+        
+        // Change icon and text color to white for better contrast
+        const icon = item.querySelector('i');
+        const text = item.querySelector('span');
+        if (icon) icon.style.color = '#ffffff';
+        if (text) text.style.color = '#ffffff';
     });
     
     item.addEventListener('mouseleave', () => {
         item.style.background = 'var(--primary-bg)';
         item.style.boxShadow = '0 0 0px rgba(255, 105, 180, 0)';
+        
+        // Reset icon and text color back to original
+        const icon = item.querySelector('i');
+        const text = item.querySelector('span');
+        if (icon) icon.style.color = 'var(--accent-pink)';
+        if (text) text.style.color = 'var(--text-primary)';
     });
 });
 
-// Project card hover effects
-document.querySelectorAll('.project-card').forEach(card => {
-    card.addEventListener('mouseenter', () => {
-        const image = card.querySelector('.project-image');
-        image.style.transform = 'scale(1.05)';
-        image.style.transition = 'transform 0.3s ease';
-    });
-    
-    card.addEventListener('mouseleave', () => {
-        const image = card.querySelector('.project-image');
-        image.style.transform = 'scale(1)';
-    });
-});
+// Project card hover effects are now handled by CSS
 
 // Contact form handling
 const contactForm = document.querySelector('.contact-form form');
@@ -340,6 +386,8 @@ function createParticle() {
 
 // Create particles periodically
 setInterval(createParticle, 3000);
+
+
 
 // Add CSS for particle animation
 const style = document.createElement('style');
