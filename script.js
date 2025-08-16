@@ -413,12 +413,6 @@ style.textContent = `
         0% {
             transform: translateX(100vw) translateY(-100px) rotate(45deg);
         }
-        3% {
-            transform: translateX(95vw) translateY(5vh) rotate(45deg);
-        }
-        50% {
-            transform: translateX(50vw) translateY(50vh) rotate(45deg);
-        }
         100% {
             transform: translateX(-100px) translateY(100vh) rotate(45deg);
         }
